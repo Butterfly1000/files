@@ -1,4 +1,4 @@
-## `Kafka` 是一个分布式流式平台，它有三个关键能力
+## Kafka 是一个分布式流式平台，它有三个关键能力
 
 1. 订阅发布记录流，它类似于企业中的`消息队列` 或 `企业消息传递系统`
 2. 以容错的方式存储记录流
@@ -140,33 +140,33 @@ sudo docker pull zookeeper:3.7.0
 #### 创建第一个 Zookeeper 容器
 
 ```
-docker run -p 2182:2181 -d --name zookeeper1 --network zookeeper-net --memory 1g \
+docker run -p 2182:2181 -d --name zookeeper1 --hostname zookeeper1 --network zookeeper-net --memory 1g \
 -v /usr/local/zookeeper1/data:/data \
 -v /usr/local/zookeeper1/log:/datalog \
 -e ZOO_MY_ID=1 \
--e ZOO_SERVERS="server.1=zookeeper1:2888:3888 server.2=zookeeper2:2888:3888 server.3=zookeeper3:2888:3888" \
+-e ZOO_SERVERS="server.1=zookeeper1:2888:3888;2181 server.2=zookeeper2:2888:3888;2181 server.3=zookeeper3:2888:3888;2181" \
 zookeeper:3.7.0
 ```
 
 #### 创建第二个 Zookeeper 容器
 
 ```bash
-docker run -p 2183:2181 -d --name zookeeper2 --network zookeeper-net --memory 1g \
+docker run -p 2183:2181 -d --name zookeeper2 --hostname zookeeper2 --network zookeeper-net --memory 1g \
 -v /usr/local/zookeeper2/data:/data \
 -v /usr/local/zookeeper2/log:/datalog \
 -e ZOO_MY_ID=2 \
--e ZOO_SERVERS="server.1=zookeeper1:2888:3888 server.2=zookeeper2:2888:3888 server.3=zookeeper3:2888:3888" \
+-e ZOO_SERVERS="server.1=zookeeper1:2888:3888;2181 server.2=zookeeper2:2888:3888;2181 server.3=zookeeper3:2888:3888;2181" \
 zookeeper:3.7.0
 ```
 
 #### 创建第三个 Zookeeper 容器
 
 ```bash
-docker run -p 2184:2181 -d --name zookeeper3 --network zookeeper-net --memory 1g \
+docker run -p 2184:2181 -d --name zookeeper3 --hostname zookeeper3 --network zookeeper-net --memory 1g \
 -v /usr/local/zookeeper3/data:/data \
 -v /usr/local/zookeeper3/log:/datalog \
 -e ZOO_MY_ID=3 \
--e ZOO_SERVERS="server.1=zookeeper1:2888:3888 server.2=zookeeper2:2888:3888 server.3=zookeeper3:2888:3888" \
+-e ZOO_SERVERS="server.1=zookeeper1:2888:3888;2181 server.2=zookeeper2:2888:3888;2181 server.3=zookeeper3:2888:3888;2181" \
 zookeeper:3.7.0
 ```
 
@@ -374,7 +374,7 @@ sudo yum install java-1.8.0-openjdk-devel (如果/usr/lib/jvm/java-1.8.0-openjdk
 
 ```
 # cd .. 往回退一层 到 /usr/local/kafka 目录下
-./kafka-topics.sh --create --zookeeper 172.19.0.4:2181 --replication-factor 2 --partitions 1 --topic test
+./kafka-topics.sh --create --zookeeper 127.0.0.1:2182 --replication-factor 2 --partitions 1 --topic test
 
 ## 在较新版本的Kafka（2.2.0及以后版本）中，kafka-topics.sh 脚本不再使用 --zookeeper 选项来指定Zookeeper的地址，而是改为使用 --bootstrap-server 选项来指定Kafka broker的地址。
 ## 查看版本
@@ -383,18 +383,43 @@ sudo yum install java-1.8.0-openjdk-devel (如果/usr/lib/jvm/java-1.8.0-openjdk
 ## Kafka broker的实际地址和端口
 cat ../config/server.properties | grep "listeners"
 
-./kafka-topics.sh --create --bootstrap-server 47.120.xx.xx:9092 --replication-factor 2 --partitions 1 --topic test
+./kafka-topics.sh --create --bootstrap-server 127.0.0.1:9092 --replication-factor 1 --partitions 1 --topic test
 ```
 
 对上面的解释
 
 ```
---replication-factor 2   复制两份
+--replication-factor 1   复制一份，因为只有一个broker
 
 --partitions 1 创建1个分区
 
 --topic 创建主题
 ```
+
+> 查看所有的主题：
+
+```
+./kafka-topics.sh --list --bootstrap-server 127.0.0.1:9092
+```
+
+> 查看特定主题的详细信息：
+
+```
+./kafka-topics.sh --describe --bootstrap-server 127.0.0.1:9092 --topic test
+```
+
+> 向主题发布消息：
+
+```
+./kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic test
+```
+
+> 从主题消费消息
+
+```
+./kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic test --from-beginning
+```
+这个命令会显示 test 主题中的所有消息，包括已经发布的消息和新发布的消息。如果你只想看到新发布的消息，可以去掉 --from-beginning 参数。
 
 问题: **`[2024-07-11 14:29:26,166]` WARN [AdminClient clientId=adminclient-1] Connection to node -1 (/47.120.xx.xx:9092) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)**
 
