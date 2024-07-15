@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport"
+  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="./public/mermaid/mermaid.min.css">
+  <!-- <link rel="stylesheet" href="./public/docsify/vue.css"> -->
+</head>
+
+<body>
+  <div id="app">Please wait...</div>
+  <script src="./public/mermaid/mermaid.min.js"></script>
+
+  <script>
+    window.$docsify = {
+      name: '文档中心',
+      repo: '',
+      loadSidebar: true,
+        auto2top: true,
+        subMaxLevel: 5,
+        alias: {
+            '/.*/_sidebar.md': '/_sidebar.md'
+        },
+        markdown: {
+            renderer: {
+                code: function(code, lang) {
+                    if (lang === "mermaid") {
+                        return (
+                                '<div class="mermaid">' + mermaid.render('mermaid-svg-' + num++, code) + "</div>"
+                        );
+                    }
+                    return this.origin.code.apply(this, arguments);
+                }
+            }
+        },
+        //搜索插件
+        search: {
+            maxAge: 86400000,
+            // todo 这个数组是执行脚本得到的，不需要人工修改，具体请查看 gulpfile.js
+            /*gulp*/paths: ["/README.md"],
+            depth: 6,
+            placeholder: '本文档内搜索',
+            noData: '未找到结果，换个搜索词试试？',
+            namespace: 'airdroid_server',
+        },
+    }
+  </script>
+
+  <!-- Docsify v4 -->
+  <!-- <script src="//cdn.jsdelivr.net/npm/docsify@4"></script> -->
+  <script src="./public/vue/vue@2.6.14"></script>
+  <script src="./public/plugins/search.js"></script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "preact": "./public/vendor/preact.module.js",
+        "preact/hooks": "./public/vendor/preact-hooks.module.js",
+        "htm": "./public/vendor/htm.module.js",
+        "htm/preact": "./public/vendor/htm-preact.module.js"
+      }
+    }
+  </script>
+
+  <script type="module" src="./public/plugins/read_history.js"></script>
+  <script src="./public/docsify/docsify.min.js"></script>
+</body>
+</html>
